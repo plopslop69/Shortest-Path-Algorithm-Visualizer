@@ -12,6 +12,7 @@ let pc_3_E = document.getElementById("ip_pc_3-E");
 let pc_4_E = document.getElementById("ip_pc_4-E");
 let pc_5_E = document.getElementById("ip_pc_5-E");
 
+
 let count = 0;
 let cur = [];
 
@@ -40,31 +41,41 @@ function load_pc(){
             function visualize_appear()
             {
                 visualize.style.opacity = 1;
-                visualize.removeAttribute("disabled");
                 visualize.style.transition = "all 300ms ease-in";
+                visualize.removeAttribute("disabled");
                 visualize.style.cursor = "pointer";
             }, 1000
         )
-
-        reset_button.style.opacity = 0;
-        reset_button.style.setProperty("disabled", 1);
         
+        let num_ip = document.querySelectorAll("[type = 'number']");
+        // console.log(num_ip[0].value);
+        for(const i of num_ip){
+            if(i.value == ''){
+                i.value = 10;
+                load_pc();
+            }
+        }
+
     // }
 
 }
+
 
 // Defining custom attributes in HTML
 // In CSS, we can use any random attribute name
 // In JS, we have to create a "data-[custom_attribute_name]" attribute and call them in js code using [element].dataset.[custom_attribute_name]
 
 function visualize(){
+    console.log("Entered visualization");
     let start = document.getElementById("ValueS");
     console.log(start.dataset.reachable);
     path_choose(start);
+    setTimeout(() => {
+        document.getElementById("visualize").setAttribute('disabled', '');
+    }, 1000);
 }
 
 function path_choose(nstart){
-    let end_2 = new String;
     let reach_array = new Array();
     let rvalue_array = new Array();
     reach_array = generate_reach_array(nstart);
@@ -97,19 +108,33 @@ function path_choose(nstart){
     console.log("minpc = "+ minpc);
     console.log(`${id}_${nth + 1}`);
     console.log(rvalue_array[nth]);
+    let subid_ip = `S_${reach_array[nth]}`;
+    console.log(subid_ip);
 
-    let pathsvg = document.querySelector(`[data-subid = ${id}_${nth + 1}]`);
-    console.log(pathsvg.dataset.subid);
+    let pathsvg = document.querySelector(`[data-subid = "${subid_ip}"]`);
+    console.log(pathsvg);
     console.log("Go to animation");
     node_end2 = animate_nodespath(pathsvg.id);
-    end_2 = node_end2.id.replace('Value', '');
-    console.log("Return Back");
-    if(end_2 == 'E'){
-        setTimeout(reset_appear(), 3000);
+    console.log(`ID is = ${node_end2.id}`);
+    console.log(`id = ${id}`);
+    console.log("Returned Back");
+    if(node_end2.id == 'ValueE'){
+        setTimeout(() => {
+            reset_appear();
+        }, 1000);
+        console.log("REACHED THE GOAL");
+        
     }else{
-        path_choose(node_end2);
-    }
+        
+        setInterval(() => {
+            path_choose(node_end2);
+            console.log("Shouldn't be here after goal");
+        }, 3000);
+    } 
+    console.log("return?");
+    stop();
 }
+
 
 function generate_reach_array(nstart){ // Generated array of reachable nodes
     const id = String(nstart.id.replace(`Value`, ``));
@@ -118,7 +143,7 @@ function generate_reach_array(nstart){ // Generated array of reachable nodes
     let nodes_reach = new Array();
     let reach = nstart.dataset.reachable;
     // console.log(typeof reach);
-
+    
     for(const i of reach.split(`_`)){ 
     // Forms an array of node values reachable from the start node  (nstart)
         console.log(i);
@@ -136,25 +161,23 @@ function generate_reach_array(nstart){ // Generated array of reachable nodes
 }
 
 function reset_ip(){
-    console.log("I'm heree");
     let pc_inputs = document.getElementsByClassName("ip_pc");
     let pc_values = document.getElementsByClassName("pc");
     let fnodes = document.getElementsByClassName("frontnode");
     let pfnodes = document.getElementsByClassName("frontpath");
     let nodes = document.getElementsByClassName("node");
     for(const i of pc_inputs){
-        console.log(i.value);
         i.value = null;
     }
     pc_values[11].innerHTML = "5-E";
     pc_values[10].innerHTML = "4-E";
     pc_values[9].innerHTML = "3-E";
-    pc_values[8].innerHTML = "3-5";
-    pc_values[7].innerHTML = "3-4";
+    pc_values[8].innerHTML = "3-5-3";
+    pc_values[7].innerHTML = "3-4-3";
     pc_values[6].innerHTML = "2-5";
-    pc_values[5].innerHTML = "2-3";
+    pc_values[5].innerHTML = "2-3-2";
     pc_values[4].innerHTML = "1-4";
-    pc_values[3].innerHTML = "1-3";
+    pc_values[3].innerHTML = "1-3-1";
     pc_values[2].innerHTML = "S-3";
     pc_values[1].innerHTML = "S-2";
     pc_values[0].innerHTML = "S-1";
@@ -180,13 +203,36 @@ function reset_ip(){
             i.style.color = "#4B50B9";
         }
     }
-
     cur.length = 0;
-    console.log(cur);
     count = 0;
+    console.log("ALL RESET!");
 
 }
 
+
+function alert_prompt(){
+    let alert_prompt = document.getElementById("alert");
+    let alert_reset = document.getElementById("alert_reset");
+    alert_prompt.style.display = "block";
+    alert_reset.removeAttribute("disabled");
+    alert_reset.style.cursor = 'pointer';
+    setTimeout(() => {
+        alert_prompt.style.opacity = "1";
+    }, 10);
+}
+
+function alert_prompt_disappear(){
+    console.log("yes");
+    let alert_prompt = document.getElementById("alert");
+    let alert_reset = document.getElementById("alert_reset");
+    alert_prompt.style.opacity = "0";
+    alert_reset.setAttribute('disabled', true);
+    alert_reset.style.cursor = 'auto';
+    setTimeout(() => {
+        alert_prompt.style.display = "none";
+    }, 400);
+    reset_ip();
+}
 
 function animate_nodespath(pathID){
     // let test = document.getElementById("ip_pc_2-5").id.split('_');
@@ -236,7 +282,7 @@ function animate_nodespath(pathID){
             let node_value_end2 = document.getElementById(`Value${end2}`);
             check_loop(cur, end2);
             cur[count] = Number(node_value_end2.innerHTML);
-            console.log(cur);
+            console.log(String(cur));
 
             // Setting transition times for each element
             // Removing transitions and effects for node_end1 as it had already been deployed in the previous iteration
@@ -257,9 +303,8 @@ function animate_nodespath(pathID){
             console.log(`end2 =` + end2);  
             count++;
             end_2 = end2;
+            console.log("if1");
         }else{
-            // if(pathID_array.length == 4){
-            console.log("This is a bidirectional path!");
             console.log(pathID_array);
             let end1 = pathID_array[1];
             let end2 = pathID_array[2];
@@ -270,7 +315,7 @@ function animate_nodespath(pathID){
             let node_value_end2 = document.getElementById(`Value${end2}`);
             check_loop(cur, end2);
             cur[count] = Number(node_value_end2.innerHTML);
-            console.log(cur);
+            console.log(String(cur));
             
             if(cur[count - 1] == Number(node_value_end1.innerHTML)){
 
@@ -288,6 +333,8 @@ function animate_nodespath(pathID){
                 
                 circle_node_end2.style.opacity = 0;
                 node_value_end2.style.color = "white";
+            console.log("if2");
+
             }else{
                 // Setting transition times for each element
                 circle_node_end1.style.transition = "all 500ms ease-in";
@@ -311,6 +358,8 @@ function animate_nodespath(pathID){
                 node_value_end2.style.color = "white";
                 circle_node_end2.style.transitionDelay = "1000ms";
                 node_value_end2.style.transitionDelay = "1000ms";
+            console.log("if3");
+
             }
             console.log(`end2 =` + end2); 
             count++;
@@ -321,7 +370,7 @@ function animate_nodespath(pathID){
         return node_end2;
     }
     catch(err){
-        alert("The Path Entered Causes Loop or Dead End, Thus is Invalid!");
+        alert_prompt();
         console.log(err);
     }  
 }
@@ -339,10 +388,13 @@ function reset_appear()
 function check_loop(cur, end2){
         for(const i of cur){
             if(i == end2){
-                alert("The Path Entered Causes Loop or Dead End, Thus is Invalid!");
+                alert_prompt();
             }
         }
 }
 
 // setTimeout(reset_appear(), 5000); //only after goal node is found
 
+function stop(){
+    console.log("Ended");
+}
